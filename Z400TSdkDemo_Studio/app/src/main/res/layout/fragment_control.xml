@@ -1,0 +1,197 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/page_bg"
+    android:scrollbars="none" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingRight="@dimen/activity_margin" >
+
+        <Button
+            android:id="@+id/btn_realtime_data"
+            style="@style/common_bt"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/view_data" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginTop="0dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/sleep_state"
+                android:textColor="@color/COLOR_4"
+                android:textSize="@dimen/Title_3" />
+
+            <TextView
+                android:id="@+id/tv_sleep_status"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/COLOR_3"
+                android:textSize="@dimen/Title_3" />
+        </LinearLayout>
+        
+        <View style="@style/page_divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginTop="0dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/breathrate"
+                android:textColor="@color/COLOR_4"
+                android:textSize="@dimen/Title_3" />
+
+            <TextView
+                android:id="@+id/tv_breathrate"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/COLOR_3"
+                android:textSize="@dimen/Title_3" />
+        </LinearLayout>
+
+        <View style="@style/page_divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginTop="0dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/heartrate"
+                android:textColor="@color/COLOR_4"
+                android:textSize="@dimen/Title_3" />
+
+            <TextView
+                android:id="@+id/tv_heartrate"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/COLOR_3"
+                android:textSize="@dimen/Title_3" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/layout_envir_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <View style="@style/page_divider" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_marginTop="0dp"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="15dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/COLOR_4"
+                    android:textSize="@dimen/Title_3" 
+                    android:text="@string/cur_temp"
+                    />
+
+                <TextView
+                    android:id="@+id/tv_temp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/COLOR_3"
+                    android:textSize="@dimen/Title_3" />
+            </LinearLayout>
+
+            <View style="@style/page_divider" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_marginTop="0dp"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="15dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/COLOR_4"
+                    android:textSize="@dimen/Title_3" 
+                    android:text="@string/cur_humidity"
+                    />
+
+                <TextView
+                    android:id="@+id/tv_hum"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/COLOR_3"
+                    android:textSize="@dimen/Title_3" />
+            </LinearLayout>
+            <View style="@style/page_divider" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_signal_strength"
+            style="@style/common_bt"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="0dp"
+            android:text="@string/view_signal_strength" 
+            android:visibility="gone"
+            />
+
+        <Button
+            android:id="@+id/btn_stop_collect"
+            style="@style/common_bt"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="30dp"
+            android:text="@string/creat_report" />
+    </LinearLayout>
+
+</ScrollView>
