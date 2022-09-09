@@ -256,7 +256,8 @@ public class DataFragment extends BaseFragment {
 //				SleepData.Data_1642782105_409.data1, SleepData.Data_1642782105_409.data2, 
 //				SleepData.Data_1642782105_409.data3, SleepData.Data_1642782105_409.data4);
 //		longData = createLongReportData1(1643039573, 511, SleepData.Data_1643039573_511.data2, SleepData.Data_1643039573_511.data3);
-		longData = createLongReportData1(1629651612, 493, SleepData.Data_1629651612_493.data1, SleepData.Data_1629651612_493.data3);
+//		longData = createLongReportData1(1629651612, 493, SleepData.Data_1629651612_493.data1, SleepData.Data_1629651612_493.data3);
+		longData = createLongReportData1(1657043276, 348, SleepData.Data_1657043276_348.data1, SleepData.Data_1657043276_348.data3);
 	}
 
 	private void initShortReportView(HistoryData historyData) {
@@ -413,9 +414,9 @@ public class DataFragment extends BaseFragment {
 			tvCollectDate.setText(dateFormat.format(new Date(historyData.getSummary().getStartTime() * 1000l)));
 			tvSleepScore.setText(String.valueOf(analysis.getSleepScore()));
 
-			int duration = historyData.getSummary().getRecordCount();
+			int duration = historyData.getAnalysis().getDuration();
 			int fallSleep = analysis.getFallsleepTimeStamp();
-			// int wakeUp = analysis.getWakeupTimeStamp();
+//			 int wakeUp = analysis.getWakeupTimeStamp();
 			int wakeUp = fallSleep + duration * 60;
 			tvSleepTime.setText(timeFormat.format(new Date(fallSleep * 1000l)) + "(" + getString(R.string.asleep_point) + ")-" + timeFormat.format(new Date(wakeUp * 1000l)) + "(" + getString(R.string.awake_point) + ")");
 			int hour = duration / 60;
@@ -843,7 +844,7 @@ public class DataFragment extends BaseFragment {
 		detail.setData3(data3);
 		detail.setData4(data24);
 		historyData.setDetail(detail);
-		Analysis analysis = AnalysisUtil.analysData(summ, detail, 0);
+		Analysis analysis = AnalysisUtil.analysData(summ, detail, 1);
 		SdkLog.log(TAG + " createLongReportData analysis:" + analysis);
 		historyData.setAnalysis(analysis);
 		return historyData;
