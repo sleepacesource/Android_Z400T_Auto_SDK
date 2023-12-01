@@ -140,4 +140,16 @@
   <string name="opt_fail">未连接设备,操作失败</string>
   <string name="temp">温度</string>
   <string name="humidity">湿度</string>
+  <string name="ahi">AHI值</string>
+  <string name="distribution_apnea_events">呼吸暂停次数分布</string>
+  <string name="head_apnea_duration">呼吸事件总持续时长</string>
+  <string name="head_apnea_events">呼吸事件总次数</string>
+  <string name="csa_duration">中枢性呼吸暂停持续时长</string>
+  <string name="events_of_csa">中枢性呼吸暂停次数</string>
+  <string name="max_csa_duration">最长中枢性呼吸暂停持续的时长</string>
+  <string name="osa_duration">阻塞性暂停/低通气持续时长</string>
+  <string name="events_of_osa">阻塞性暂停/低通气次数</string>
+  <string name="max_osa_duration">最长阻塞性暂停/低通气持续的时长</string>
+  <string name="unit_ahi">次/时</string>
+  <string name="algorithm_version">算法版本</string>
 </resources>

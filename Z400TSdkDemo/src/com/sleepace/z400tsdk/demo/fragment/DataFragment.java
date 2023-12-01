@@ -17,13 +17,15 @@ import com.sleepace.sdk.manager.CONNECTION_STATE;
 import com.sleepace.sdk.manager.CallbackData;
 import com.sleepace.sdk.manager.DeviceType;
 import com.sleepace.sdk.util.SdkLog;
+import com.sleepace.sdk.util.StringUtil;
 import com.sleepace.sdk.util.TimeUtil;
+import com.sleepace.sdk.z400t.constants.SleepConfig;
+import com.sleepace.sdk.z400t.constants.SleepStatusType;
 import com.sleepace.sdk.z400t.domain.Analysis;
 import com.sleepace.sdk.z400t.domain.Detail;
 import com.sleepace.sdk.z400t.domain.HistoryData;
 import com.sleepace.sdk.z400t.domain.Summary;
 import com.sleepace.sdk.z400t.util.AnalysisUtil;
-import com.sleepace.sdk.z400t.util.SleepConfig;
 import com.sleepace.z400tsdk.demo.R;
 import com.sleepace.z400tsdk.demo.bean.CvPoint;
 import com.sleepace.z400tsdk.demo.util.DensityUtil;
@@ -39,6 +41,7 @@ import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -249,15 +252,14 @@ public class DataFragment extends BaseFragment {
 	private void initDemoData() {
 		// TODO Auto-generated method stub
 		shortData = createShortReportData(1483056407, 166);
-		// longData = createLongReportData(1500649565, 714);
-		// longData = createLongReportData1(1642695891, 421);
+		longData = createLongReportData(1701133867, 348);
 //		longData = createLongReportData1(1642868610, 430);
 //		longData = createLongReportData1(1642782105, 409, 
 //				SleepData.Data_1642782105_409.data1, SleepData.Data_1642782105_409.data2, 
 //				SleepData.Data_1642782105_409.data3, SleepData.Data_1642782105_409.data4);
 //		longData = createLongReportData1(1643039573, 511, SleepData.Data_1643039573_511.data2, SleepData.Data_1643039573_511.data3);
 //		longData = createLongReportData1(1629651612, 493, SleepData.Data_1629651612_493.data1, SleepData.Data_1629651612_493.data3);
-		longData = createLongReportData1(1657043276, 348, SleepData.Data_1657043276_348.data1, SleepData.Data_1657043276_348.data3);
+//		longData = createLongReportData1(1657043276, 348, SleepData.Data_1657043276_348.data1, SleepData.Data_1657043276_348.data3);
 	}
 
 	private void initShortReportView(HistoryData historyData) {
@@ -279,9 +281,11 @@ public class DataFragment extends BaseFragment {
 		TextView tvAvgBreathRate = (TextView) view.findViewById(R.id.tv_avg_breathrate);
 		TextView tvTemp = (TextView) view.findViewById(R.id.tv_temp);
 		TextView tvHumidity = (TextView) view.findViewById(R.id.tv_humidity);
+		TextView tvAlgorithmVersion = (TextView) view.findViewById(R.id.tv_algorithm_version);
+		
 		if (analysis != null) {
 			int starttime = historyData.getSummary().getStartTime();
-			int endtime = starttime + historyData.getSummary().getRecordCount() * 60;
+			int endtime = starttime + analysis.getFinalLen() * 60;
 			tvCollectDate.setText(dateFormat.format(new Date(starttime * 1000l)));
 			tvSleepTime.setText(timeFormat.format(new Date(starttime * 1000l)) + "(" + getString(R.string.starting_point) + ")-" + timeFormat.format(new Date(endtime * 1000l)) + "(" + getString(R.string.end_point) + ")");
 			int duration = historyData.getSummary().getRecordCount();
@@ -315,6 +319,7 @@ public class DataFragment extends BaseFragment {
 		if(maxHum < minHum) maxHum = minHum;
 		tvTemp.setText(minTemp + "~" + maxTemp + "℃");
 		tvHumidity.setText(minHum + "~" + maxHum + "%");
+		tvAlgorithmVersion.setText(ver);
 		reportLayout.addView(view);
 	}
 
@@ -351,7 +356,7 @@ public class DataFragment extends BaseFragment {
 		main_graph.setMinMaxY(-3, 2);
 		main_graph.setVerticalLabels(new String[] { "", getString(R.string.wake_), getString(R.string.light_), getString(R.string.mid_), getString(R.string.deep_), "" });
 
-		main_graph.setBeginAndOffset(historyData.getSummary().getStartTime(), TimeUtil.getTimeZoneSecond(), 0);
+		main_graph.setBeginAndOffset(historyData.getSummary().getStartTime(), TimeUtil.getTimeZoneHour(), 0);
 		main_graph.setScalable(false);
 		main_graph.setScrollable(false);
 		main_graph.setShowLegend(false);
@@ -398,7 +403,19 @@ public class DataFragment extends BaseFragment {
 		TextView tvAsleepDuration = (TextView) view.findViewById(R.id.tv_fall_asleep_duration);
 		TextView tvAvgHeartRate = (TextView) view.findViewById(R.id.tv_avg_heartrate);
 		TextView tvAvgBreathRate = (TextView) view.findViewById(R.id.tv_avg_breathrate);
-		TextView tvBreathPause = (TextView) view.findViewById(R.id.tv_respiration_pause);
+		
+		TextView tvAHI = (TextView) view.findViewById(R.id.tv_ahi);
+		TextView tvAHIInfo = (TextView) view.findViewById(R.id.tv_ahi_info);
+		TextView tvApneaEventAllDuration = (TextView) view.findViewById(R.id.tv_head_apnea_duration);
+		TextView tvApneaEventAllTimes = (TextView) view.findViewById(R.id.tv_head_apnea_events);
+		TextView tvCsaDuration = (TextView) view.findViewById(R.id.tv_csa_duration);
+		TextView tvEventsOfCsa = (TextView) view.findViewById(R.id.tv_events_of_csa);
+		TextView tvMaxCsaDuration = (TextView) view.findViewById(R.id.tv_max_csa_duration);
+		TextView tvOsaDuration = (TextView) view.findViewById(R.id.tv_osa_duration);
+		TextView tvEventsOfOsa = (TextView) view.findViewById(R.id.tv_events_of_osa);
+		TextView tvMaxOsaDuration = (TextView) view.findViewById(R.id.tv_max_osa_duration);
+		TextView tvAlgorithmVersion = (TextView) view.findViewById(R.id.tv_algorithm_version);
+		
 		TextView tvDeepSleepPer = (TextView) view.findViewById(R.id.tv_deep_sleep_proportion);
 		TextView tvMidSleepPer = (TextView) view.findViewById(R.id.tv_medium_sleep_proportion);
 		TextView tvLightSleepPer = (TextView) view.findViewById(R.id.tv_light_sleep_proportion);
@@ -416,8 +433,9 @@ public class DataFragment extends BaseFragment {
 
 			int duration = historyData.getAnalysis().getDuration();
 			int fallSleep = analysis.getFallsleepTimeStamp();
-//			 int wakeUp = analysis.getWakeupTimeStamp();
-			int wakeUp = fallSleep + duration * 60;
+			 int wakeUp = analysis.getWakeupTimeStamp();
+//			int wakeUp = fallSleep + duration * 60;
+			 SdkLog.log(TAG+" fallSleep:" +fallSleep+",date:"+ StringUtil.DATE_FORMAT.format(new Date(fallSleep * 1000l))+",duration:" + duration+",wakeUp:"+wakeUp+",date:" + StringUtil.DATE_FORMAT.format(new Date(wakeUp * 1000l)));
 			tvSleepTime.setText(timeFormat.format(new Date(fallSleep * 1000l)) + "(" + getString(R.string.asleep_point) + ")-" + timeFormat.format(new Date(wakeUp * 1000l)) + "(" + getString(R.string.awake_point) + ")");
 			int hour = duration / 60;
 			int minute = duration % 60;
@@ -499,7 +517,7 @@ public class DataFragment extends BaseFragment {
 				item.score = analysis.getMd_fall_asleep_time_decrease_scale();
 				list.add(item);
 			}
-
+			
 			if (analysis.getBreathPauseTimes() > 0 && analysis.getMd_breath_stop_decrease_scale() > 0) {// 呼吸暂停
 				DeductItems item = new DeductItems();
 				item.desc = getString(R.string.abnormal_breathing);
@@ -550,31 +568,93 @@ public class DataFragment extends BaseFragment {
 			hour = analysis.getFallAlseepAllTime() / 60;
 			minute = analysis.getFallAlseepAllTime() % 60;
 			tvAsleepDuration.setText(hour + getString(R.string.unit_h) + minute + getString(R.string.unit_m));
-			int idx = 0;
-			StringBuffer sb = new StringBuffer();
-			if (analysis.getBreathPauseTimes() > 0) {
-				idx = 0;
-				int stime = historyData.getSummary().getStartTime();
-				Detail detail = historyData.getDetail();
-				int[] status = detail.getStatus();
-				int len = status.length;
-				for (int i = 0; i < len; i++) {
-					if (analysis.getBreathRateStatusAry()[i] > 0) {
-						idx++;
-						sb.append(getString(R.string.sequence, String.valueOf(idx)) + "\t\t\t");
-						int time = stime + i * 60;
-						sb.append(timeFormat.format(new Date(time * 1000l)) + "\t\t\t");
-						sb.append(analysis.getBreathRateStatusAry()[i] + getString(R.string.unit_s) + "\n");
+			
+			if(analysis.getAhIndex() == 0) {
+				tvAHI.setText(R.string.nothing);
+			}else {
+				tvAHI.setText(analysis.getAhIndex() + getString(R.string.unit_ahi));
+			}
+			
+			short[] ahiArr = analysis.getAhiAry();
+			if (ahiArr != null && ahiArr.length > 3) {
+				short count = ahiArr[2];
+				byte sHour = (byte) ((ahiArr[0] >> 8) & 0xFF);
+				byte sMinute = (byte) (ahiArr[0] & 0xFF);
+				byte eHour = (byte) ((ahiArr[1] >> 8) & 0xFF);
+				byte eMinute = (byte) (ahiArr[1] & 0xFF);
+				Calendar calendar = Calendar.getInstance();
+				calendar.set(Calendar.HOUR_OF_DAY, sHour);
+				calendar.set(Calendar.MINUTE, sMinute);
+				calendar.set(Calendar.SECOND, 0);
+
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < count; i++) {
+					String sTime = String.format("%02d:%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+					String eTime = null;
+					if (i == 0) {
+						if (sMinute == 0) {
+							calendar.add(Calendar.MINUTE, 60);
+						} else {
+							calendar.add(Calendar.MINUTE, 60 - sMinute);
+						}
+						eTime = String.format("%02d:%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+					} else if (i == (count - 1)) {
+						eTime = String.format("%02d:%02d", eHour, eMinute);
+					} else {
+						calendar.add(Calendar.MINUTE, 60);
+						eTime = String.format("%02d:%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+					}
+
+					sb.append(sTime);
+					sb.append("~");
+					sb.append(eTime);
+					sb.append("\t\t\t");
+					sb.append(ahiArr[i + 3]);
+					sb.append(getString(R.string.unit_times));
+
+					if (i != (count - 1)) {
+						sb.append("\n");
 					}
 				}
-
-				if (sb.length() > 0) {
-					sb.delete(sb.lastIndexOf("\n"), sb.length());
-				}
-				tvBreathPause.setText(sb.toString());
-			} else {
-				tvBreathPause.setText(R.string.nothing);
+				tvAHIInfo.setText(sb.toString());
+			}else {
+				tvAHIInfo.setText(R.string.nothing);
 			}
+			
+			tvApneaEventAllDuration.setText(analysis.getBreathPauseAllTime()+getString(R.string.unit_s));
+			tvApneaEventAllTimes.setText(analysis.getBreathPauseTimes()+getString(R.string.unit_times));
+			tvCsaDuration.setText(analysis.getCsaDur()+getString(R.string.unit_s));
+			tvEventsOfCsa.setText(analysis.getCsaCnt()+getString(R.string.unit_times));
+			tvMaxCsaDuration.setText(analysis.getCsaMaxDur()+getString(R.string.unit_s));
+			tvOsaDuration.setText(analysis.getOsaDur()+getString(R.string.unit_s));
+			tvEventsOfOsa.setText(analysis.getOsaCnt()+getString(R.string.unit_times));
+			tvMaxOsaDuration.setText(analysis.getOsaMaxDur()+getString(R.string.unit_s));
+			
+//			int idx = 0;
+//			StringBuffer sb = new StringBuffer();
+//			if (analysis.getBreathPauseTimes() > 0) {
+//				idx = 0;
+//				int stime = historyData.getSummary().getStartTime();
+//				Detail detail = historyData.getDetail();
+//				int[] status = detail.getStatus();
+//				int len = status.length;
+//				for (int i = 0; i < len; i++) {
+//					if (analysis.getBreathRateStatusAry()[i] > 0) {
+//						idx++;
+//						sb.append(getString(R.string.sequence, String.valueOf(idx)) + "\t\t\t");
+//						int time = stime + i * 60;
+//						sb.append(timeFormat.format(new Date(time * 1000l)) + "\t\t\t");
+//						sb.append(analysis.getBreathRateStatusAry()[i] + getString(R.string.unit_s) + "\n");
+//					}
+//				}
+//
+//				if (sb.length() > 0) {
+//					sb.delete(sb.lastIndexOf("\n"), sb.length());
+//				}
+//				tvBreathPause.setText(sb.toString());
+//			} else {
+//				tvBreathPause.setText(R.string.nothing);
+//			}
 
 			tvDeepSleepPer.setText(analysis.getDeepSleepPerc() + "%");
 			tvMidSleepPer.setText(analysis.getInSleepPerc() + "%");
@@ -610,6 +690,7 @@ public class DataFragment extends BaseFragment {
 		tvTemp.setText(minTemp + "~" + maxTemp + "℃");
 		tvHumidity.setText(minHum + "~" + maxHum + "%");
 
+		tvAlgorithmVersion.setText(ver);
 		reportLayout.addView(view);
 
 	}
@@ -641,15 +722,36 @@ public class DataFragment extends BaseFragment {
 		int[] statusValue = new int[] { 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 3, 1, 1, 0, 0, 1, 1, 2, 0, 0, 3, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 0, 0, 0, 0, 1, 4, 1, 1, 5, 3, 4, 0, 1, 3, 3, 3, 5, 5, 5, 3, 1, 1, 8, 1, 1, 2, 2, 1, 1, 4, 2, 1, 1, 0, 1, 0, 3, 3, 1, 0, 1, 6, 0, 1, 0, 7, 8, 3, 1, 3, 1, 0, 1, 1, 5, 1, 1, 2, 2, 0, 1 };
 
+		int[] temp = new int[] { 
+				26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 
+				27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 
+				26, 26, 26, 26, 26, 26, 26, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 
+				25, 26, 26, 26, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 
+				25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 
+				27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27};
+
+		int[] humidity = new int[] { 
+				44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 
+				44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 
+				44, 44, 44, 44, 44, 44, 44, 47, 47, 47, 47, 47, 47, 47, 47, 47, 46, 46, 46, 45, 45, 45, 48, 48, 48, 47, 47, 47, 46, 46, 
+				46, 44, 44, 44, 46, 46, 46, 48, 48, 48, 46, 46, 46, 45, 45, 45, 48, 48, 48, 48, 48, 48, 46, 46, 46, 47, 47, 47, 48, 48, 
+				48, 48, 48, 48, 47, 47, 47, 47, 47, 47, 45, 45, 45, 45, 45, 45, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 
+				44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44
+		};
+		
 		detail.setHeartRate(heartRate);
 		detail.setBreathRate(breathRate);
 		detail.setStatus(status);
 		detail.setStatusValue(statusValue);
+		detail.setTemp(temp);
+		detail.setHumidity(humidity);
 		historyData.setDetail(detail);
 
-		// Analysis analysis = AnalysisUtil.analysData(summ, detail, 1);
+//		Analysis analysis = AnalysisUtil.analysData(summ, detail, 1);
 		Analysis analysis = new Analysis();
-		analysis.setAlgorithmVer(null);
+		analysis.setAvgHeartRate(64);
+		analysis.setAvgBreathRate(14);
+		analysis.setAlgorithmVer("2.0.17");
 		historyData.setAnalysis(analysis);
 		return historyData;
 	}
@@ -662,145 +764,123 @@ public class DataFragment extends BaseFragment {
 		historyData.setSummary(summ);
 
 		Detail detail = new Detail();
-		int[] heartRate = new int[] { 57, 65, 68, 74, 77, 70, 60, 60, 64, 63, 59, 62, 57, 66, 61, 65, 52, 57, 61, 67, 65, 64, 59, 60, 56, 61, 62, 54, 62, 57, 58, 67, 63, 55, 61, 58, 66, 62, 63, 66, 63, 63, 64, 63, 64, 59, 54, 60, 63, 60, 55, 64, 58, 65, 69, 78, 76, 73, 73, 76, 71, 73, 75, 73, 73,
-				73, 74, 74, 71, 72, 70, 70, 72, 72, 72, 71, 69, 69, 68, 69, 69, 66, 64, 66, 68, 67, 68, 68, 68, 67, 66, 67, 67, 66, 66, 66, 68, 67, 67, 65, 67, 67, 67, 66, 67, 65, 66, 66, 66, 65, 65, 65, 65, 67, 67, 65, 65, 66, 66, 66, 65, 66, 66, 64, 65, 65, 65, 65, 65, 65, 66, 65, 65, 65, 64, 67,
-				69, 72, 75, 69, 70, 68, 68, 70, 65, 62, 68, 64, 69, 68, 65, 62, 67, 66, 66, 67, 64, 66, 66, 64, 64, 65, 64, 66, 65, 65, 66, 63, 63, 63, 63, 63, 67, 66, 62, 64, 65, 65, 64, 63, 69, 64, 61, 65, 65, 64, 64, 64, 64, 63, 63, 63, 66, 64, 63, 64, 65, 63, 64, 64, 64, 64, 64, 67, 64, 65, 65,
-				63, 63, 62, 63, 61, 59, 64, 63, 64, 63, 58, 60, 62, 62, 65, 64, 68, 64, 64, 68, 65, 65, 66, 65, 65, 64, 64, 64, 66, 63, 65, 64, 65, 65, 66, 65, 63, 64, 62, 63, 63, 63, 63, 62, 62, 59, 61, 57, 62, 62, 60, 58, 61, 60, 62, 63, 62, 58, 63, 60, 63, 61, 63, 60, 61, 62, 63, 62, 61, 63, 62,
-				59, 61, 61, 59, 64, 63, 63, 62, 60, 57, 65, 63, 61, 66, 64, 64, 63, 66, 61, 57, 63, 59, 64, 60, 61, 61, 63, 57, 55, 58, 60, 60, 62, 60, 59, 61, 58, 68, 62, 67, 63, 66, 63, 64, 64, 57, 65, 64, 57, 58, 61, 62, 61, 64, 60, 61, 61, 64, 63, 63, 63, 62, 62, 60, 65, 60, 61, 64, 65, 62, 62,
-				63, 61, 65, 63, 60, 61, 61, 61, 63, 61, 61, 61, 63, 61, 64, 62, 63, 62, 64, 62, 62, 64, 61, 62, 61, 62, 64, 62, 64, 63, 62, 58, 62, 61, 62, 63, 61, 60, 58, 58, 61, 59, 62, 60, 60, 63, 66, 63, 63, 58, 60, 61, 63, 63, 61, 63, 61, 62, 66, 60, 63, 62, 63, 61, 61, 64, 63, 62, 63, 62, 61,
-				62, 59, 61, 63, 60, 58, 61, 63, 61, 61, 60, 66, 62, 62, 61, 62, 64, 62, 62, 62, 60, 60, 63, 62, 63, 62, 62, 60, 60, 62, 61, 60, 60, 61, 62, 63, 62, 62, 63, 64, 63, 59, 63, 63, 61, 63, 64, 64, 60, 63, 61, 61, 63, 63, 63, 64, 62, 62, 63, 63, 63, 62, 63, 64, 64, 65, 65, 64, 63, 65, 64,
-				64, 62, 63, 64, 65, 63, 64, 63, 62, 64, 68, 64, 64, 64, 60, 62, 61, 61, 65, 61, 65, 65, 61, 61, 71, 70, 68, 67, 65, 65, 63, 62, 61, 62, 64, 61, 65, 67, 62, 66, 66, 62, 62, 60, 60, 60, 63, 65, 60, 58, 58, 62, 60, 54, 57, 65, 62, 65, 66, 65, 61, 60, 59, 62, 62, 62, 62, 63, 58, 62, 62,
-				60, 59, 62, 65, 63, 60, 61, 63, 60, 62, 62, 62, 61, 63, 64, 64, 65, 63, 64, 64, 63, 65, 66, 65, 64, 65, 64, 65, 65, 64, 66, 65, 64, 71, 71, 69, 68, 66, 67, 67, 62, 66, 67, 64, 66, 65, 62, 67, 67, 71, 58, 57, 55, 0, 0, 0, 0, 0, 0, 0, 55, 62, 64, 61, 64, 64, 67, 65, 65, 72, 67, 69, 68,
-				69, 69, 69, 69, 69, 65, 66, 64, 66, 66, 66, 67, 66, 65, 68, 65, 57, 65, 61, 68, 66, 64, 61, 60, 57, 58, 66, 66, 57, 59, 65, 67, 65, 65, 58, 72, 59, 59, 61, 68, 66, 61, 64, 72, 68, 66, 64, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 65,
-				72 };
+		int[] heartRate = new int[] { 0, 66, 60, 61, 60, 62, 61, 66, 62, 68, 72, 72, 72, 72, 0, 0, 0, 66, 57, 60, 61, 61, 57, 61, 63, 60, 61, 60, 61, 62, 58, 59, 56, 61, 57, 62, 56, 56, 58, 55, 56, 59, 58, 56, 57, 58, 54, 57, 57, 63, 57, 60, 55, 59, 55, 58, 56, 52, 54, 60, 57, 55, 54, 59, 59, 59,
+				57, 54, 60, 54, 56, 57, 61, 58, 58, 56, 60, 57, 60, 52, 56, 55, 60, 54, 56, 55, 58, 61, 57, 54, 58, 51, 57, 53, 55, 55, 53, 52, 57, 54, 54, 55, 60, 57, 55, 61, 57, 54, 54, 60, 61, 56, 60, 57, 56, 54, 57, 56, 56, 59, 66, 61, 59, 62, 63, 56, 55, 53, 54, 57, 58, 62, 54, 60, 64, 61, 61,
+				60, 54, 53, 57, 57, 61, 62, 68, 56, 60, 58, 60, 57, 55, 57, 53, 60, 61, 60, 59, 57, 55, 57, 54, 54, 57, 57, 59, 56, 54, 57, 58, 56, 54, 55, 56, 53, 54, 55, 54, 54, 61, 53, 53, 56, 55, 59, 54, 57, 54, 55, 54, 57, 54, 52, 57, 54, 57, 52, 56, 58, 68, 61, 60, 62, 61, 57, 58, 59, 63, 57,
+				63, 55, 57, 59, 53, 56, 53, 61, 59, 61, 58, 63, 55, 58, 64, 68, 66, 55, 55, 60, 60, 59, 56, 56, 57, 57, 55, 60, 59, 67, 56, 56, 58, 57, 53, 63, 52, 55, 62, 57, 60, 59, 64, 61, 62, 62, 56, 58, 58, 57, 62, 63, 57, 60, 61, 60, 62, 58, 62, 61, 59, 57, 60, 56, 60, 64, 66, 63, 61, 63, 58,
+				57, 58, 58, 56, 56, 57, 54, 63, 59, 67, 58, 54, 54, 60, 63, 60, 60, 56, 68, 0, 0, 0, 66, 59, 60, 58, 55, 55, 56, 61, 55, 54, 55, 55, 56, 56, 54, 59, 60, 57, 56, 58, 55, 54, 57, 60, 54, 57, 53, 56, 56, 55, 58, 56, 56, 58, 55, 58, 56, 56, 57, 60, 65, 55, 56, 54, 59, 57, 56 };
 
-		int[] breathRate = new int[] { 15, 19, 14, 15, 15, 18, 14, 16, 14, 16, 15, 15, 15, 14, 15, 15, 15, 15, 16, 13, 15, 13, 14, 15, 12, 17, 15, 15, 19, 20, 19, 20, 17, 15, 15, 17, 17, 17, 18, 15, 15, 14, 15, 21, 19, 21, 16, 20, 18, 17, 17, 17, 13, 13, 14, 15, 15, 15, 15, 16, 17, 18, 18, 18, 18,
-				17, 18, 19, 16, 19, 16, 19, 19, 18, 19, 19, 19, 18, 18, 19, 19, 18, 17, 16, 15, 16, 15, 15, 16, 15, 16, 16, 16, 14, 16, 16, 15, 16, 15, 15, 17, 15, 15, 15, 17, 17, 16, 17, 15, 15, 17, 15, 18, 18, 14, 14, 14, 14, 15, 15, 15, 14, 15, 15, 15, 15, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15,
-				19, 15, 17, 16, 19, 18, 19, 14, 15, 16, 20, 16, 20, 19, 18, 18, 18, 14, 17, 17, 19, 17, 17, 19, 14, 16, 14, 14, 15, 18, 16, 15, 15, 15, 15, 15, 16, 18, 19, 19, 19, 16, 18, 19, 14, 16, 17, 15, 15, 18, 18, 18, 16, 18, 17, 17, 19, 16, 19, 18, 20, 14, 19, 18, 18, 18, 19, 18, 17, 18, 18,
-				17, 18, 18, 19, 18, 18, 17, 17, 18, 19, 18, 17, 17, 16, 17, 15, 15, 19, 17, 18, 18, 19, 19, 18, 18, 18, 18, 18, 18, 17, 17, 16, 12, 18, 18, 19, 18, 19, 19, 18, 19, 19, 19, 18, 18, 16, 14, 15, 15, 16, 15, 13, 15, 15, 14, 14, 15, 14, 14, 14, 14, 14, 15, 17, 15, 15, 16, 16, 16, 16, 16,
-				16, 14, 17, 16, 18, 14, 17, 17, 15, 16, 17, 17, 17, 19, 17, 16, 20, 20, 18, 19, 18, 17, 18, 18, 18, 16, 18, 18, 19, 17, 12, 22, 18, 16, 16, 18, 19, 15, 19, 15, 17, 18, 17, 18, 17, 16, 17, 16, 17, 15, 15, 18, 17, 17, 17, 17, 19, 17, 17, 18, 19, 18, 18, 18, 18, 18, 19, 18, 17, 18, 17,
-				18, 18, 17, 16, 18, 18, 18, 18, 18, 17, 17, 18, 18, 18, 17, 18, 17, 17, 18, 17, 18, 17, 17, 17, 17, 17, 18, 18, 18, 16, 15, 15, 15, 14, 16, 16, 15, 14, 17, 13, 15, 15, 17, 17, 16, 18, 17, 17, 18, 18, 18, 18, 16, 16, 17, 18, 17, 18, 18, 18, 15, 14, 14, 14, 13, 14, 15, 17, 18, 13, 16,
-				17, 16, 16, 14, 13, 15, 15, 14, 14, 16, 16, 17, 18, 16, 18, 16, 16, 17, 16, 18, 17, 14, 15, 15, 17, 17, 17, 16, 18, 15, 16, 17, 18, 16, 17, 17, 17, 17, 18, 17, 17, 18, 18, 18, 17, 18, 18, 17, 15, 14, 15, 15, 15, 16, 15, 16, 17, 15, 14, 15, 15, 15, 15, 15, 15, 15, 15, 14, 14, 15, 14,
-				15, 16, 15, 15, 15, 15, 15, 16, 17, 16, 19, 16, 19, 18, 18, 20, 19, 17, 19, 18, 18, 19, 18, 20, 15, 22, 18, 18, 15, 19, 19, 18, 17, 19, 20, 15, 21, 20, 19, 20, 18, 20, 15, 17, 17, 17, 20, 17, 18, 18, 16, 21, 16, 18, 15, 17, 16, 18, 15, 17, 17, 15, 15, 18, 18, 17, 18, 16, 18, 18, 17,
-				15, 16, 17, 17, 18, 18, 19, 19, 18, 18, 19, 18, 18, 19, 19, 19, 18, 19, 19, 18, 18, 18, 18, 19, 19, 19, 19, 18, 19, 18, 18, 19, 18, 18, 18, 16, 15, 17, 16, 18, 19, 18, 13, 13, 14, 18, 17, 16, 17, 19, 16, 15, 12, 0, 0, 0, 0, 0, 0, 0, 12, 13, 0, 14, 15, 14, 15, 16, 15, 19, 15, 15, 15,
-				17, 19, 19, 19, 15, 15, 15, 15, 15, 15, 15, 18, 15, 15, 15, 15, 15, 0, 20, 16, 14, 17, 15, 16, 18, 18, 18, 15, 19, 19, 15, 15, 19, 16, 16, 15, 17, 15, 16, 15, 15, 19, 15, 18, 19, 17, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15,
-				15 };
+		int[] breathRate = new int[] { 0, 13, 12, 12, 13, 13, 14, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 15, 12, 14, 12, 14, 18, 17, 20, 21, 22, 19, 21, 20, 19, 20, 20, 18, 22, 18, 21, 18, 20, 18, 20, 19, 18, 19, 21, 20, 19, 20, 19, 18, 12, 18, 17, 16, 15, 17, 18, 19, 19, 18, 19, 16, 20, 15, 18, 16, 18,
+				17, 16, 13, 15, 16, 17, 16, 18, 16, 18, 16, 17, 15, 17, 16, 15, 16, 19, 15, 16, 15, 17, 18, 20, 20, 19, 16, 17, 18, 18, 18, 16, 17, 18, 18, 19, 18, 17, 15, 19, 17, 19, 19, 17, 19, 17, 16, 17, 18, 17, 19, 18, 20, 22, 19, 22, 22, 22, 22, 21, 21, 18, 21, 20, 22, 20, 21, 22, 21, 19, 22,
+				17, 22, 21, 19, 15, 17, 16, 16, 20, 18, 16, 18, 16, 16, 18, 17, 18, 15, 18, 18, 16, 20, 19, 18, 18, 16, 15, 17, 18, 18, 18, 18, 15, 19, 19, 19, 18, 17, 18, 17, 16, 17, 17, 18, 17, 17, 17, 18, 18, 18, 19, 18, 16, 17, 17, 17, 17, 17, 16, 20, 18, 17, 0, 15, 15, 19, 17, 17, 20, 13, 12,
+				0, 13, 16, 16, 16, 0, 16, 14, 13, 18, 22, 16, 19, 22, 18, 19, 16, 12, 16, 17, 13, 0, 17, 18, 17, 18, 18, 13, 19, 17, 17, 18, 18, 17, 18, 18, 17, 14, 13, 17, 16, 15, 15, 17, 13, 12, 17, 17, 16, 19, 15, 17, 12, 16, 16, 17, 12, 19, 18, 12, 17, 16, 16, 20, 15, 20, 21, 19, 19, 19, 20, 19,
+				18, 20, 21, 20, 18, 18, 17, 19, 17, 19, 17, 13, 13, 17, 15, 16, 17, 0, 0, 0, 16, 16, 17, 14, 19, 20, 21, 21, 21, 19, 18, 19, 19, 18, 19, 19, 17, 19, 20, 18, 13, 15, 15, 17, 17, 15, 19, 18, 18, 18, 19, 19, 18, 16, 19, 19, 17, 17, 19, 15, 18, 16, 16, 19, 18, 19, 18 };
 
-		int[] status = new int[] { 14, 14, 14, 14, 8, 14, 12, 14, 8, 12, 8, 14, 12, 14, 8, 8, 8, 8, 12, 12, 12, 12, 14, 8, 14, 12, 14, 8, 8, 8, 8, 12, 14, 8, 8, 8, 12, 12, 14, 12, 8, 12, 12, 12, 12, 12, 8, 8, 14, 12, 8, 14, 12, 14, 8, 8, 8, 8, 8, 8, 12, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-				8, 8, 8, 8, 8, 8, 44, 40, 40, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 46, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 8, 8, 8, 8, 8, 8, 40, 40, 40, 40, 40, 46, 44, 40, 40, 12, 8, 8, 8, 14, 8, 8, 8, 8, 8, 8, 8, 8, 14, 8, 8, 8, 8,
-				8, 8, 14, 14, 8, 12, 8, 8, 8, 14, 8, 8, 8, 8, 8, 14, 8, 14, 8, 8, 8, 14, 8, 14, 8, 8, 8, 8, 8, 8, 8, 12, 8, 8, 8, 12, 8, 8, 8, 14, 44, 40, 8, 8, 8, 8, 14, 14, 8, 8, 14, 8, 8, 14, 8, 8, 8, 8, 8, 14, 8, 14, 8, 14, 8, 12, 14, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 14, 14, 14, 8, 8, 8, 8,
-				8, 8, 8, 8, 8, 8, 8, 8, 14, 8, 8, 8, 40, 40, 44, 46, 8, 14, 8, 8, 8, 12, 8, 8, 8, 8, 12, 8, 8, 14, 8, 8, 8, 8, 8, 40, 40, 40, 40, 40, 8, 8, 12, 14, 8, 8, 44, 40, 40, 8, 12, 12, 12, 8, 12, 14, 8, 14, 8, 8, 8, 8, 8, 8, 8, 8, 14, 8, 12, 8, 8, 8, 14, 8, 8, 8, 8, 8, 8, 8, 14, 8, 14, 8, 8,
-				8, 8, 8, 8, 8, 8, 8, 14, 8, 8, 8, 8, 8, 8, 8, 8, 8, 14, 8, 8, 8, 8, 8, 14, 40, 40, 8, 40, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 40, 40, 40, 40, 40, 40, 40, 40, 40, 46, 40, 46, 14, 8, 14, 8, 14, 14, 12, 8, 8, 12, 8, 8, 8, 8, 8, 8, 8, 12, 8, 8, 14, 12, 8, 8, 12, 12, 8, 8, 14, 8, 8, 14,
-				8, 8, 12, 8, 8, 8, 14, 8, 8, 12, 14, 14, 12, 14, 8, 14, 8, 8, 14, 8, 8, 8, 8, 14, 12, 8, 8, 8, 14, 8, 14, 8, 8, 14, 8, 8, 14, 8, 8, 8, 8, 14, 8, 8, 8, 8, 8, 14, 8, 8, 8, 8, 8, 8, 8, 14, 8, 8, 8, 8, 8, 8, 8, 8, 40, 40, 8, 8, 8, 8, 8, 8, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 44, 40,
-				40, 40, 40, 46, 40, 14, 8, 12, 8, 8, 8, 8, 8, 8, 8, 12, 14, 8, 8, 8, 8, 8, 40, 46, 8, 14, 8, 8, 8, 12, 8, 12, 14, 8, 8, 12, 12, 14, 12, 8, 8, 14, 14, 8, 12, 8, 8, 8, 12, 8, 14, 8, 12, 14, 8, 12, 14, 14, 8, 8, 8, 8, 8, 14, 8, 8, 8, 8, 8, 14, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-				8, 8, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 46, 40, 46, 40, 40, 8, 14, 14, 14, 8, 14, 14, 14, 12, 12, 8, 14, 14, 8, 14, 13, 13, 13, 13, 13, 13, 13, 12, 8, 10, 12, 8, 8, 8, 8, 8, 14, 12, 8, 14, 14, 14, 14, 14, 14, 12, 8, 8, 8, 8, 8, 12, 8, 12, 8, 8, 8, 10, 14, 14, 14, 8,
-				12, 8, 14, 12, 12, 12, 12, 8, 12, 8, 12, 12, 14, 12, 14, 12, 12, 8, 14, 14, 14, 12, 14, 8, 8, 8, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 8, 8, 8 };
+		int[] status = new int[] { 0, 1, 1, 1, 1, 1, 1, 1, 1, 17, 17, 17, 17, 17, 0, 0, 0, 35, 34, 34, 35, 34, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 34, 1, 1, 1, 1, 1, 1, 1, 35, 1, 1, 35, 1, 1, 1, 34, 34, 34, 1, 34, 1, 1, 1, 1, 1, 1, 1, 1, 35, 34, 34, 1, 35, 1, 1, 1, 35, 1, 34, 34, 1, 1, 1, 1, 1, 34,
+				34, 1, 34, 35, 1, 35, 1, 35, 1, 1, 34, 1, 1, 1, 1, 1, 1, 1, 35, 1, 1, 35, 35, 34, 34, 1, 1, 35, 1, 35, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 35, 1, 1, 35, 35, 1, 1, 34, 34, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 35, 1, 35, 1, 17, 34, 1, 1, 34, 1, 1, 1, 1, 17, 1, 1, 1, 1, 17, 1, 1, 34, 35, 1, 1, 35, 1, 1, 1, 1, 1, 1, 1, 35, 17, 35, 34, 1, 1, 34, 1, 34, 1, 1, 1, 34, 1, 1, 35, 1, 1, 1, 1, 1, 1, 1, 1, 1, 35, 1, 34,
+				35, 1, 34, 1, 34, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 35, 1, 35, 34, 35, 34, 34, 35, 0, 0, 0, 35, 34, 35, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 35, 1, 1, 1, 1, 34, 35, 34, 35, 1, 34, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 35, 1, 34, 34, 1, 34, 1,
+				1, 1, 1, 1 };
 
-		int[] statusValue = new int[] { 1, 2, 1, 1, 0, 1, 2, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 2, 2, 1, 2, 1, 0, 1, 1, 1, 0, 0, 0, 0, 2, 2, 0, 0, 0, 1, 1, 1, 2, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 2, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0,
-				0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 2, 0, 0, 0, 1, 1, 1, 0, 2, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 2, 0, 1, 1, 0, 1, 0, 1, 1, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 0, 1, 0, 0, 2, 1, 2, 1, 1, 0, 3, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 2, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 2, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 1, 1, 0, 1, 1, 1, 1, 1, 0, 2, 1, 0, 1, 57, 60, 60, 60, 60, 60, 60, 2, 0, 12, 2, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 11, 1,
-				1, 1, 0, 1, 0, 1, 1, 3, 1, 1, 0, 2, 0, 1, 1, 1, 2, 1, 1, 2, 0, 1, 2, 1, 1, 1, 0, 0, 0, 12, 60, 60, 60, 60, 60, 60, 60, 60, 60, 42, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 9, 18, 0, 0, 0 };
+		int[] statusValue = new int[] { 24, 0, 0, 0, 0, 0, 0, 0, 0, 39, 60, 60, 60, 60, 42, 60, 41, 1, 1, 2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 2, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1,
+				0, 1, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 2, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 12, 1, 0, 0, 1, 0, 0, 0, 0, 13, 0, 0, 0, 0, 11, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 12, 1, 1, 0, 0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 55, 60, 38, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 2, 0, 2, 0, 0, 0, 0, 0 };
+
+		int[] temp = new int[] { 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+				25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 26, 26, 26, 26, 26,
+				26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
+				27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
+				27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 25, 25, 25, 26, 26, 26, 26, 26, 26, 26, 26 };
+
+		int[] humidity = new int[] { 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
+				44, 47, 47, 47, 47, 47, 47, 47, 47, 47, 46, 46, 46, 45, 45, 45, 48, 48, 48, 47, 47, 47, 46, 46, 46, 44, 44, 44, 46, 46, 46, 48, 48, 48, 46, 46, 46, 45, 45, 45, 48, 48, 48, 48, 48, 48, 46, 46, 46, 47, 47, 47, 48, 48, 48, 48, 48, 48, 47, 47, 47, 47, 47, 47, 45, 45, 45, 45, 45, 45, 44,
+				44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
+				44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
+				44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 45, 45, 45, 44, 44, 44, 45, 45, 45, 44, 44, 44, 46, 46, 46, 45, 45, 45, 44, 44, 44, 45, 45 };
 
 		detail.setHeartRate(heartRate);
 		detail.setBreathRate(breathRate);
 		detail.setStatus(status);
 		detail.setStatusValue(statusValue);
 		historyData.setDetail(detail);
-
-		// Analysis analysis = AnalysisUtil.analysData(summ, detail, 0,
-		// DeviceType.DEVICE_TYPE_P3);
-		// SdkLog.log(TAG+" createLongReportData algorithmVer:" +
-		// analysis.getAlgorithmVer());
+		detail.setTemp(temp);
+		detail.setHumidity(humidity);
 
 		Analysis analysis = new Analysis();
-		analysis.setMd_breath_low_decrease_scale((short) 1);
-		analysis.setMd_body_move_decrease_scale((short) 4);
-		analysis.setMd_leave_bed_decrease_scale((short) 2);
-		analysis.setMd_sleep_time_increase_scale((short) 7);
-		analysis.setMd_fall_asleep_time_decrease_scale((short) 15);
-		analysis.setMd_breath_stop_decrease_scale((short) 2);
-		analysis.setMd_start_time_decrease_scale((short) 1);
-		analysis.setMd_wake_cnt_decrease_scale((short) 20);
-		analysis.setMd_perc_effective_sleep_decrease_scale((short) 7);
-
-		analysis.setDuration(584);
-		analysis.setSleepScore(41);
-		analysis.setLightSleepAllTime(193);
-		analysis.setInSleepAllTime(285);
-		analysis.setDeepSleepAllTime(72);
-		analysis.setDeepSleepPerc(10);
-		analysis.setInSleepPerc(39);
-		analysis.setLightSleepPerc(27);
-		analysis.setWakeSleepPerc(24);
-		analysis.setWake(62);
-		analysis.setWakeTimes(6);
-		analysis.setBreathPauseTimes(1);
-		analysis.setBreathPauseAllTime(12);
-		analysis.setHeartBeatPauseTimes(0);
-		analysis.setHeartBeatPauseAllTime(0);
-		analysis.setLeaveBedTimes(1);
-		analysis.setOutOfBedDuration(417);
-		analysis.setBodyMovementTimes(65);
-		analysis.setTrunOverTimes(105);
-		analysis.setAvgHeartRate(64);
+		analysis.setAlgorithmVer("2.0.17");
 		analysis.setAvgBreathRate(17);
-		analysis.setMaxHeartBeatRate(75);
+		analysis.setAvgHeartRate(58);
+		analysis.setFallAlseepAllTime(1);
+		analysis.setWakeAndLeaveBedBeforeAllTime(344);
+		analysis.setLeaveBedTimes(2);
+		analysis.setBreathPauseTimes(192);
+		analysis.setDeepSleepPerc(7);
+		analysis.setInSleepPerc(37);
+		analysis.setLightSleepPerc(51);
+		analysis.setWakeSleepPerc(5);
+		analysis.setDuration(342);
+		analysis.setWakeTimes(3);
+		analysis.setLightSleepAllTime(170);
+		analysis.setInSleepAllTime(127);
+		analysis.setDeepSleepAllTime(27);
+		analysis.setWake(3);
+		analysis.setBreathPauseAllTime(5506);
+		analysis.setMaxHeartBeatRate(72);
 		analysis.setMaxBreathRate(22);
-		analysis.setMinHeartBeatRate(54);
+		analysis.setMinHeartBeatRate(51);
 		analysis.setMinBreathRate(12);
-		analysis.setBreathRateSlowAllTime(1);
-		analysis.setFallAlseepAllTime(68);
+		analysis.setBreathRateSlowAllTime(11);
+		analysis.setSleepScore(43);
+		analysis.setReportFlag(1); // 长报告
 
-		int fallsleepTimeStamp = summ.getStartTime() + analysis.getFallAlseepAllTime() * 60;
-		int wakeupTimeStamp = fallsleepTimeStamp + analysis.getDuration() * 60;
+		analysis.setFallsleepTimeStamp(1701133927);
+		analysis.setWakeupTimeStamp(1701154507);
 
-		analysis.setFallsleepTimeStamp(fallsleepTimeStamp);
-		analysis.setWakeupTimeStamp(wakeupTimeStamp);
+		analysis.setAhiAry(new short[] {2316,3639,6,4,34,29,68,34,20});
+		analysis.setBodyMovementTimes(77);
+		analysis.setOsaMaxDur(56);
+		analysis.setOsaCnt(165);
+		analysis.setOsaDur(3512);
+		analysis.setCsaMaxDur(155);
+		analysis.setCsaCnt(27);
+		analysis.setCsaDur(1994);
+		analysis.setAhiMaxDur(155);
+		analysis.setAhIndex(33);
 
-		// analysis.setHeartBeatRateSlowAllTime(14);
-		// analysis.setWakeAndLeaveBedBeforeAllTime(6);
-		// analysis.setBreathRateFastAllTime(0);
+		analysis.setMd_body_move_decrease_scale((short) 2); // 躁动不安扣分项
+		analysis.setMd_leave_bed_decrease_scale((short) 2);
+		analysis.setMd_wake_cnt_decrease_scale((short) 2); // 清醒次数扣分项
+		analysis.setMd_sleep_time_decrease_scale((short) 10);
+		analysis.setMd_breath_stop_decrease_scale((short) 30);
+		analysis.setMd_breath_low_decrease_scale((short) 1);
+		analysis.setMd_perc_effective_sleep_decrease_scale((short) 10); // 良性睡眠扣分项
 
-		analysis.setSleepCurveArray(new float[] { 0.0f, -0.023902f, -0.048756f, -0.009266f, -0.030327f, -0.022877f, -0.009779f, -0.01524f, -0.015893f, -0.030261f, -0.023268f, -0.018548f, -0.046933f, -0.045622f, -0.048341f, -0.028757f, -0.021429f, -2.75E-4f, -0.001263f, -0.029837f, -0.006594f,
-				-0.04686f, -0.015524f, -0.041563f, -0.001669f, -0.042988f, -0.045256f, -0.009457f, -0.025738f, -0.013479f, -0.007247f, -0.014944f, -0.042886f, -0.042883f, -0.00696f, -0.014681f, -0.043486f, -0.026883f, -0.009825f, -0.042183f, -0.016081f, -0.044254f, -0.027137f, -0.023638f,
-				-0.004208f, -0.005238f, -0.042136f, -0.044353f, -0.02431f, -0.024211f, -0.002863f, -0.00304f, -0.009653f, -0.017808f, -0.046687f, -0.028913f, -0.002786f, -0.012646f, -0.037875f, -0.012292f, -0.049331f, -0.017737f, -0.045937f, -0.047992f, -0.047585f, -0.030187f, -0.01214f, 0.0f,
-				0.830065f, 0.965841f, 1.108821f, 1.259004f, 1.416505f, 1.581324f, 1.74808f, 1.916546f, 2.006752f, 2.091691f, 2.171479f, 2.245773f, 2.314003f, 2.376055f, 2.431815f, 2.481283f, 2.52446f, 2.561116f, 2.591139f, 2.614415f, 2.63117f, 2.646558f, 2.660349f, 2.672774f, 2.68383f, 2.693632f,
-				2.702523f, 2.710616f, 2.718025f, 2.72475f, 2.730791f, 2.736148f, 2.741049f, 2.745608f, 2.564832f, 2.56848f, 2.571785f, 2.575205f, 2.578738f, 2.582386f, 2.586147f, 2.589794f, 2.593328f, 2.596747f, 2.600167f, 2.603586f, 2.607006f, 2.610425f, 2.613617f, 2.80112f, 2.802947f, 2.803185f,
-				2.800925f, 2.796166f, 2.78891f, 2.779155f, 2.765995f, 2.750337f, 2.732181f, 2.711527f, 2.688375f, 2.662724f, 2.634576f, 2.604158f, 2.571924f, 2.536966f, 2.500191f, 2.462509f, 2.423919f, 2.384421f, 2.344015f, 2.303608f, 2.261386f, 2.217348f, 2.171948f, 2.124278f, 2.074337f, 2.023035f,
-				1.970371f, 1.915436f, 1.859594f, 1.803752f, 1.747002f, 1.690252f, 1.633501f, 1.575843f, 1.517277f, 1.45871f, 1.400144f, 1.341124f, 1.283466f, 1.226261f, 1.168603f, 1.109582f, 1.050108f, 0.989726f, 0.928435f, 0.868053f, 0.808578f, 0.750012f, 0.694169f, 0.640597f, 0.589295f, 0.54117f,
-				0.49804f, 0.458088f, 0.42313f, 0.393166f, 0.368196f, 0.346404f, 0.330059f, 0.318255f, 0.310083f, 0.304635f, 0.301911f, 0.301003f, 0.303273f, 0.307813f, 0.315531f, 0.324611f, 0.335053f, 0.345042f, 0.355484f, 0.366379f, 0.380454f, 0.395436f, 0.41178f, 0.429486f, 0.447646f, 0.464444f,
-				0.480334f, 0.492592f, 0.50258f, 0.507574f, 0.50939f, 0.506665f, 0.499856f, 0.488052f, 0.472161f, 0.451277f, 0.427215f, 0.399975f, 0.370465f, 0.338685f, 0.30645f, 0.274216f, 0.243798f, 0.214742f, 0.189772f, 0.165256f, 0.142556f, 0.122125f, 0.103966f, 0.088075f, 0.076522f, 0.067489f,
-				0.061931f, 0.058237f, 0.058723f, 0.063388f, 0.074144f, 0.091695f, 0.117449f, 0.149591f, 0.189937f, 0.236576f, 0.290214f, 0.352259f, 0.422711f, 0.499504f, 0.581933f, 0.665771f, 0.750313f, 0.831333f, 0.910239f, 0.985623f, 1.05678f, 1.121596f, 1.180071f, 1.230796f, 1.277999f, 1.322384f,
-				1.363246f, 1.400586f, 1.434403f, 1.462584f, 1.487947f, 1.510492f, 1.533036f, 1.554172f, 1.57249f, 1.58658f, 1.595739f, 1.599966f, 1.600671f, 1.598557f, 1.595035f, 1.589399f, 1.582353f, 1.57249f, 1.562627f, 1.553468f, 1.548536f, 1.547832f, 1.552764f, 1.561922f, 1.574604f, 1.590808f,
-				1.610534f, 1.633783f, 1.658442f, 1.679043f, 1.695588f, 1.706047f, 1.71183f, 1.712938f, 1.711312f, 1.704839f, 1.693521f, 1.675946f, 1.650878f, 1.620429f, 1.58336f, 1.540996f, 1.49466f, 1.444353f, 1.391397f, 1.333147f, 1.268276f, 1.195463f, 1.117354f, 1.032626f, 0.942602f, 0.849931f,
-				0.754611f, 0.66194f, 0.571916f, 0.488511f, 0.410403f, 0.336927f, 0.268085f, 0.2052f, 0.152243f, 0.111863f, 0.086706f, 0.074124f, 0.072795f, 0.082717f, 0.099918f, 0.125062f, 0.1555f, 0.191232f, 0.230934f, 0.277254f, 0.328866f, 0.385112f, 0.445988f, 0.510174f, 0.575021f, 0.640529f,
-				0.7067f, 0.774855f, 0.843011f, 0.913152f, 0.98263f, 1.051448f, 1.11828f, 1.183127f, 1.243342f, 1.299586f, 1.352522f, 1.40215f, 1.44847f, 1.495451f, 1.54177f, 1.587427f, 1.6311f, 1.673449f, 1.712489f, 1.75153f, 1.789909f, 1.828949f, 1.868651f, 1.910339f, 1.952688f, 1.995698f,
-				2.039371f, 2.083705f, 2.127378f, 2.173035f, 2.218031f, 2.262365f, 2.303391f, 2.341987f, 2.376387f, 2.407252f, 2.434583f, 2.457935f, 2.47554f, 2.488279f, 2.496151f, 2.499157f, 2.496851f, 2.489235f, 2.473218f, 2.451446f, 2.423919f, 2.393284f, 2.359985f, 2.324467f, 2.286506f, 2.246104f,
-				2.203703f, 2.159305f, 2.112687f, 2.064737f, 2.015455f, 1.965507f, 1.915115f, 1.864723f, 1.814331f, 1.764383f, 1.715323f, 1.668039f, 1.622975f, 1.580353f, 1.540616f, 1.503766f, 1.470689f, 1.442496f, 1.418743f, 1.398986f, 1.383003f, 1.371015f, 1.362579f, 1.357474f, 1.354366f, 1.35259f,
-				1.351258f, 1.350148f, 1.347928f, 1.344376f, 1.339715f, 1.333277f, 1.325063f, 1.314852f, 1.302642f, 1.288435f, 1.271119f, 1.25114f, 1.228719f, 1.2043f, 1.178993f, 1.15191f, 1.122385f, 1.091306f, 1.058896f, 1.024931f, 0.989191f, 0.951674f, 0.912604f, 0.872868f, 0.833131f, 0.794505f,
-				0.756989f, 0.722357f, 0.690833f, 0.662414f, 0.638654f, 0.619996f, 0.606664f, 0.599542f, 0.598189f, 0.603268f, 0.614779f, 0.63228f, 0.655324f, 0.682804f, 0.714718f, 0.751511f, 0.791184f, 0.833961f, 0.878953f, 0.925498f, 0.974037f, 1.024792f, 1.077321f, 1.131623f, 1.187477f, 1.244881f,
-				1.303394f, 1.363016f, 1.423745f, 1.484918f, 1.545648f, 1.606155f, 1.665112f, 1.723403f, 1.78103f, 1.837105f, 1.891629f, 1.943714f, 1.993805f, 2.042344f, 2.088445f, 2.132773f, 2.175328f, 2.216332f, 2.256006f, 2.294349f, 2.331363f, 2.368377f, 2.404062f, 2.438416f, 2.470997f, 2.501805f,
-				2.530618f, 2.556993f, 2.580487f, 2.601543f, 2.619939f, 2.635676f, 2.64824f, 2.657632f, 2.663928f, 2.666394f, 2.66503f, 2.660278f, 2.651406f, 2.639298f, 2.623957f, 2.605603f, 2.584311f, 2.560083f, 2.532185f, 2.500615f, 2.46464f, 2.425728f, 2.383513f, 2.339095f, 2.292842f, 2.244386f,
-				2.193727f, 2.142335f, 2.089841f, 2.036613f, 1.981917f, 1.926119f, 1.86922f, 1.812321f, 1.755422f, 1.698523f, 1.64089f, 1.582523f, 1.522687f, 1.462117f, 1.401915f, 1.342446f, 1.282977f, 1.223876f, 1.164774f, 1.105673f, 1.045837f, 0.986369f, 0.926533f, 0.866698f, 0.807596f, 0.749229f,
-				0.691229f, 0.634697f, 0.578899f, 0.524203f, 0.470241f, 0.417013f, 0.36452f, 0.313861f, 0.266874f, 0.225038f, 0.187253f, 0.153885f, 0.124188f, 0.098162f, 0.076946f, 0.061273f, 0.051182f, 0.047039f, 0.048501f, 0.056329f, 0.070144f, 0.090323f, 0.116525f, 0.148408f, 0.185985f, 0.230015f,
-				0.279737f, 0.335912f, 0.39892f, 0.46838f, 0.544293f, 0.625519f, 0.71168f, 0.801636f, 0.89387f, 0.989899f, 1.089345f, 1.191447f, 1.294688f, 1.39755f, 1.498514f, 1.598718f, 1.697025f, 1.793054f, 1.886047f, 1.975624f, 2.059508f, 2.136559f, 2.206647f, 2.270269f, 2.325763f, 2.372866f,
-				2.411186f, 2.441089f, 2.462941f, 2.4775f, 2.483865f, 2.481599f, 2.466249f, 2.437371f, 2.394273f, 2.339937f, 2.276052f, 2.202595f, 2.119121f, 2.026076f, 1.922568f, 1.809266f, 1.686838f, 1.555951f, 1.416161f, 1.270137f, 1.118771f, 0.962954f, 0.803129f, 0.641078f, 0.477693f, 0.31542f,
-				0.155818f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.02949f, 0.104162f, 0.189076f, 0.244499f, 0.244499f, 0.189076f, 0.104162f, 0.02949f, 0.280419f, 0.33762f, 0.396848f, 0.457973f, 0.520472f, 0.584217f, 0.647166f, 0.708134f, 0.766597f, 0.821155f, 0.867742f, 0.902533f,
-				0.924651f, 0.883842f, 0.825817f, 0.749301f, 0.674419f, 0.601569f, 0.530752f, 0.461967f, 0.0f, -0.017808f, -0.046687f, -0.028913f, -0.002786f, -0.012646f, -0.037875f, -0.012292f, -0.049331f, -0.017737f, -0.045937f, -0.047992f, -0.047585f, -0.030187f, -0.01214f, -0.009195f, -0.007962f,
-				-0.037271f, -0.020552f, -0.011153f, -0.034629f, -0.022431f, -0.032209f, -0.040871f, -0.044832f, -0.044307f, -0.016203f, -0.010146f, -0.002713f, -0.042769f, -0.041062f, -0.00566f, -0.048194f, -0.040099f, -0.003945f, -0.035087f, -0.040006f, -0.015654f, -0.031301f, -0.005814f,
-				-0.00412f, -0.010492f, -0.007693f, -0.043919f, -0.019726f, -0.03407f, -0.03278f, -0.014025f, 0.0f, -0.023902f, -0.048756f, -0.009266f, -0.030327f, -0.022877f, -0.009779f, -0.01524f, -0.015893f, -0.030261f, -0.023268f, -0.018548f, -0.046933f, -0.045622f });
-		analysis.setSleepCurveStatusArray(new short[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		// int fallsleepTimeStamp = summ.getStartTime() +
+		// analysis.getFallAlseepAllTime() * 60;
+		// int wakeupTimeStamp = fallsleepTimeStamp + analysis.getDuration() * 60;
+		// analysis.setFallsleepTimeStamp(fallsleepTimeStamp);
+		// analysis.setWakeupTimeStamp(wakeupTimeStamp);
+
+		analysis.setSleepCurveArray(new float[] { 0, 0, 0.90709543f, 1.0710061f, 1.1770587f, 1.2434365f, 1.2875129f, 1.3291332f, 1.4370048f, 1.4920353f, 1.5267947f, 1.5501891f, 1.5662099f, 1.4261433f, 0, 0, 0, 0, 0, 0.037264824f, 0.14261603f, 0.29783726f, 0.47608972f, 0.6465516f, 0.7797487f,
+				0.8526497f, 0.8526497f, 0.7797487f, 0.6465516f, 0.47608995f, 0.2978375f, 0.14261627f, 0.037264824f, 0, 0, 0, 0.14438295f, 0.2832799f, 0.41167784f, 0.52957654f, 0.63396525f, 0.7166753f, 0.7982397f, 0.87707186f, 0.952605f, 1.0249429f, 1.0948639f, 1.1616948f, 1.2257993f, 1.2878717f,
+				1.3482281f, 1.4057442f, 1.4604199f, 1.5103093f, 1.5551188f, 1.5941383f, 1.6270739f, 1.6542197f, 1.675698f, 1.692158f, 1.7036608f, 1.7094963f, 1.7106683f, 1.7064668f, 1.6963043f, 1.6804746f, 1.6598105f, 1.6357323f, 1.6095984f, 1.5819966f, 1.5532202f, 1.5223882f, 1.4897944f,
+				1.4560261f, 1.421377f, 1.3864341f, 1.3520786f, 1.3180165f, 1.2854228f, 1.2540035f, 1.2234653f, 1.1943953f, 1.1662061f, 1.1383107f, 1.1107087f, 1.0834005f, 1.0575604f, 1.0323077f, 1.0070549f, 0.9818022f, 0.95537496f, 0.927773f, 0.8992903f, 0.8699267f, 0.8408568f, 0.81266737f,
+				0.7859218f, 0.7617698f, 0.7413862f, 0.72503996f, 0.7121558f, 0.7024529f, 0.6967871f, 0.6951833f, 0.6976168f, 0.7049687f, 0.71635795f, 0.7314906f, 0.7503178f, 0.77226496f, 0.7973068f, 0.8248813f, 0.8544252f, 0.88706446f, 0.92336154f, 0.9644418f, 1.0105869f, 1.0609525f, 1.1161014f,
+				1.1757523f, 1.2393423f, 1.3074344f, 1.3794657f, 1.4543108f, 1.5311253f, 1.6093466f, 1.6889749f, 1.7694472f, 1.8496381f, 1.9284223f, 2.0049555f, 2.0792377f, 2.1515503f, 2.2218933f, 2.2899854f, 2.3558264f, 2.418291f, 2.477942f, 2.5342164f, 2.5865514f, 2.633717f, 2.675045f, 2.7110987f,
+				2.74121f, 2.7633758f, 2.777596f, 2.7825356f, 2.7781944f, 2.7645721f, 2.7416692f, 2.7100482f, 2.6702719f, 2.6223402f, 2.5668159f, 2.505387f, 2.4392846f, 2.3691757f, 2.2950606f, 2.217607f, 2.138818f, 2.0586936f, 1.9799047f, 1.902451f, 1.8263329f, 1.7528857f, 1.6834446f, 1.6180097f,
+				1.5579164f, 1.5041708f, 1.4577787f, 1.4207522f, 1.3951033f, 1.3808322f, 1.3779386f, 1.3874286f, 1.4103084f, 1.4452422f, 1.4902184f, 1.5452367f, 1.6069499f, 1.6740224f, 1.7464544f, 1.8219043f, 1.8993661f, 1.977834f, 2.0542898f, 2.1267219f, 2.1951296f, 2.2595136f, 2.3188674f,
+				2.3721852f, 2.4194672f, 2.4607131f, 2.495923f, 2.5271091f, 2.553076f, 2.5726287f, 2.5867734f, 2.5949125f, 2.5952532f, 2.5882041f, 2.5737655f, 2.5519369f, 2.5227184f, 2.4873054f, 2.4456978f, 2.397895f, 2.3465075f, 2.2927296f, 2.2365618f, 2.178601f, 2.1200428f, 2.0596921f, 1.9981464f,
+				1.9371982f, 1.877445f, 1.8182893f, 1.7597313f, 1.7011732f, 1.64142f, 1.5804718f, 1.5183284f, 1.4537951f, 1.3862741f, 1.3169606f, 1.2452568f, 1.171163f, 1.097069f, 1.0229752f, 0.9494786f, 0.87777495f, 0.8084612f, 0.7415378f, 0.6776016f, 0.61665344f, 0.55869293f, 0.5037198f,
+				0.45292974f, 0.40452957f, 0.35732484f, 0.3119123f, 0.2712798f, 0.23363543f, 0.20085192f, 0.17301035f, 0.14891553f, 0.12856793f, 0.11400223f, 0.10521865f, 0.1028955f, 0.108389616f, 0.12170076f, 0.14223146f, 0.17185545f, 0.2098937f, 0.25558782f, 0.30730653f, 0.36564708f, 0.42737985f,
+				0.49182606f, 0.56034255f, 0.6329293f, 0.70822954f, 0.7876003f, 0.87036276f, 0.9558387f, 1.0426714f, 1.1315392f, 1.2210854f, 1.3126668f, 1.4076401f, 1.50397f, 1.6003001f, 1.6973084f, 1.7936385f, 1.8865768f, 1.9754446f, 2.0588853f, 2.1347563f, 2.2028422f, 2.2622495f, 2.314012f,
+				2.357236f, 2.3924918f, 2.4189942f, 2.4367428f, 2.446416f, 2.4493706f, 2.4047482f, 2.2923949f, 2.1319323f, 1.931616f, 1.7012529f, 1.4514353f, 1.1837181f, 0.90121365f, 0.60781336f, 0.30663085f, 0, 0, 0, 0, 0, 0.008953333f, 0.035660505f, 0.07966447f, 0.1402123f, 0.21626782f,
+				0.30653024f, 0.4094541f, 0.52327967f, 0.6460581f, 0.77568984f, 0.9099555f, 1.0465592f, 1.1831626f, 1.3174286f, 1.44706f, 1.5698388f, 1.6836641f, 1.7865883f, 1.8768504f, 1.9529061f, 2.013454f, 2.057458f, 2.084165f, 2.0931187f, 2.089427f, 2.0796432f, 2.0684357f, 2.0553737f, 2.0399628f,
+				2.0208204f, 1.9960473f, 1.9631743f, 1.9194175f, 1.8615419f, 1.7176932f, 1.5730374f, 1.4275742f, 1.287342f, 1.1797023f, 1.054427f, 0.8782296f, 0, -0.0052378178f, -0.042135954f, -0.04435301f });
+		analysis.setSleepCurveStatusArray(new short[] { 4, 1, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0 });
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0 });
 
 		int len = summ.getRecordCount();
 		int[] breathRateStatusAry = new int[len];
@@ -808,13 +888,14 @@ public class DataFragment extends BaseFragment {
 		int[] leftBedStatusAry = new int[len];
 		int[] turnOverStatusAry = new int[len];
 		for (int i = 0; i < len; i++) {
-			if ((analysis.getSleepCurveStatusArray()[i] & SleepConfig.NewBreathPause) == SleepConfig.NewBreathPause) { // 呼吸暂停点
+			byte state = (byte) (detail.getStatus()[i] & 7);
+			if (state == SleepStatusType.SLEEP_B_STOP) { // 呼吸暂停点
 				breathRateStatusAry[i] = detail.getStatusValue()[i];
-			} else if ((analysis.getSleepCurveStatusArray()[i] & SleepConfig.NewHeartPause) == SleepConfig.NewHeartPause) { // 心跳暂停点
+			} else if (state == SleepStatusType.SLEEP_H_STOP) { // 心跳暂停点
 				heartRateStatusAry[i] = detail.getStatusValue()[i];
-			} else if ((analysis.getSleepCurveStatusArray()[i] & SleepConfig.NewLeaveBed) == SleepConfig.NewLeaveBed) { // 离床
+			} else if (state == SleepStatusType.SLEEP_LEAVE && detail.getStatusValue()[i] > 0) { // 有效离床
 				leftBedStatusAry[i] = detail.getStatusValue()[i];
-			} else if ((analysis.getSleepCurveStatusArray()[i] & SleepConfig.NewTurnOver) == SleepConfig.NewTurnOver) { // 翻身
+			} else if (state == SleepStatusType.SLEEP_TURN_OVER) { // 翻身
 				turnOverStatusAry[i] = detail.getStatusValue()[i];
 			}
 		}
@@ -832,7 +913,7 @@ public class DataFragment extends BaseFragment {
 		Summary summ = new Summary();
 		summ.setStartTime(starttime);
 		summ.setRecordCount(count);
-		summ.setArithmeticVer("02.00.01");
+		summ.setFirmwareVers("02.00.01");
 		historyData.setSummary(summ);
 		Detail detail = new Detail();
 		int[] data24 = new int[count];
@@ -900,32 +981,35 @@ public class DataFragment extends BaseFragment {
 			}
 
 			if ((analysis.getSleepCurveStatusArray()[i] & SleepConfig.NewWakeUpPoint) == SleepConfig.NewWakeUpPoint) { // 清醒点
-				LineGraphView.BedBean waleUp = new LineGraphView.BedBean();
-				waleUp.setData(new GraphView.GraphViewData(i * timeStep, 0));
-				waleUp.setX(i * timeStep);
-				waleUp.setStatus(BedBean.SLEEPUP);
-				waleUp.setY(0);
-				SleepInUP.add(waleUp);
+				// 上一个点是非清醒点
+				if (i > 0 && ((analysis.getSleepCurveStatusArray()[i - 1] & SleepConfig.NewWakeUpPoint) != SleepConfig.NewWakeUpPoint)) {
+					LineGraphView.BedBean waleUp = new LineGraphView.BedBean();
+					waleUp.setData(new GraphView.GraphViewData(i * timeStep, 0));
+					waleUp.setX(i * timeStep);
+					waleUp.setStatus(BedBean.SLEEPUP);
+					waleUp.setY(0);
+					SleepInUP.add(waleUp);
+				}
 			}
 
 			// 纽扣没有呼吸暂停和心率暂停
 			if (deviceType != DeviceType.DEVICE_TYPE_SLEEPDOT) {
-				if (analysis.getHeartRateStatusAry()[i] > 0) { // 心率暂停点
-					GraphView.GraphViewData heartPause = new GraphView.GraphViewData(i * timeStep, mainData[i].valueY);
-					heartPause.setApneaRate(detail.getBreathRate()[i]);
-					heartPause.setHeartRate(detail.getHeartRate()[i]);
-					heartPause.setStatus(3);
-					heartPause.setStatusValue(analysis.getHeartRateStatusAry()[i]);
-					heartPauseList.add(heartPause);
-				}
-				if (analysis.getBreathRateStatusAry()[i] > 0) { // 呼吸暂停点
-					GraphView.GraphViewData breathPause = new GraphView.GraphViewData(i * timeStep, mainData[i].valueY);
-					breathPause.setApneaRate(detail.getBreathRate()[i]);
-					breathPause.setHeartRate(detail.getHeartRate()[i]);
-					breathPause.setStatus(2);
-					breathPause.setStatusValue(analysis.getBreathRateStatusAry()[i]);
-					apneaPauseList.add(breathPause);
-				}
+//				if (analysis.getHeartRateStatusAry()[i] > 0) { // 心率暂停点
+//					GraphView.GraphViewData heartPause = new GraphView.GraphViewData(i * timeStep, mainData[i].valueY);
+//					heartPause.setApneaRate(detail.getBreathRate()[i]);
+//					heartPause.setHeartRate(detail.getHeartRate()[i]);
+//					heartPause.setStatus(3);
+//					heartPause.setStatusValue(analysis.getHeartRateStatusAry()[i]);
+//					heartPauseList.add(heartPause);
+//				}
+//				if (analysis.getBreathRateStatusAry()[i] > 0) { // 呼吸暂停点
+//					GraphView.GraphViewData breathPause = new GraphView.GraphViewData(i * timeStep, mainData[i].valueY);
+//					breathPause.setApneaRate(detail.getBreathRate()[i]);
+//					breathPause.setHeartRate(detail.getHeartRate()[i]);
+//					breathPause.setStatus(2);
+//					breathPause.setStatusValue(analysis.getBreathRateStatusAry()[i]);
+//					apneaPauseList.add(breathPause);
+//				}
 			}
 
 			if (analysis.getLeftBedStatusAry()[i] > 0) { // 离床点

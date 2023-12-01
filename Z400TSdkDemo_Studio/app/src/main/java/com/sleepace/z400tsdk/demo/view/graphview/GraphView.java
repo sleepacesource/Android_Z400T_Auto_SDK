@@ -22,6 +22,7 @@ package com.sleepace.z400tsdk.demo.view.graphview;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.sleepace.z400tsdk.demo.DemoApp;
@@ -31,6 +32,7 @@ import com.sleepace.z400tsdk.demo.view.graphview.compatible.ScaleGestureDetector
 import com.sleepace.z400tsdk.demo.view.graphview.interfs.CustomLabelFormatter;
 import com.sleepace.z400tsdk.demo.view.graphview.interfs.GraphViewDataInterface;
 import com.sleepace.sdk.util.SdkLog;
+import com.sleepace.sdk.util.StringUtil;
 import com.sleepace.sdk.util.TimeUtil;
 
 import android.content.Context;
@@ -170,6 +172,8 @@ abstract public class GraphView extends LinearLayout {
 		this.beginTimes = beginTimes;
 		this.timezone = timezone;
 		this.dst_off = dst;
+		String date = StringUtil.DATE_FORMAT.format(new Date(beginTimes * 1000l));
+		SdkLog.log(TAG+" setBeginAndOffset beginTimes:" + beginTimes+",timezone:" + timezone+",date:" + date);
 	}
 
 	public void setTouchDisallowByParent(boolean isDisallw) {
@@ -331,7 +335,7 @@ abstract public class GraphView extends LinearLayout {
 			float graphheight = height - (2 * border);
 			graphwidth = width;
 
-//			LogUtil.log(TAG+" onDraw horlabels:" + Arrays.toString(horlabels)+",graphwidth:" + graphwidth);
+			SdkLog.log(TAG+" onDraw horlabels:" + Arrays.toString(horlabels)+",graphwidth:" + graphwidth);
 			if (horlabels == null) {
 				horlabels = generateHorlabels(graphwidth);
 			}
@@ -1055,16 +1059,15 @@ abstract public class GraphView extends LinearLayout {
 					paint.setTextSize(myLabelsSize);
 					paint.setColor(getResources().getColor(R.color.COLOR_3));
 					String strT = horlabels[i];
-//					SdkLog.log(TAG+" drawHorizontalLabels beginTimes:"+beginTimes+",timezone:"+timezone+",dst_off:"+dst_off+",labels:" + Arrays.toString(horlabels));
+					SdkLog.log(TAG+" drawHorizontalLabels beginTimes:"+beginTimes+",timezone:"+timezone+",dst_off:"+dst_off+",labels:" + Arrays.toString(horlabels));
 					// String str="";
 					if (beginTimes > 0) {
 						// SleepLog.e("得到的结果1"+strT);
 						// strT = strT.replaceAll(",","");
 						// strT = strT.replaceAll(" ","");
 						// SleepLog.e("得到的结果2"+strT);
-						int tempTime = (int) Double.parseDouble(strT) + 8 * 60 * 60;
-						// int [] times=TimeUtill.int2HMInt(beginTimes+tempTime
-						// , timezone);
+						int tempTime = (int) Double.parseDouble(strT);
+						// int [] times=TimeUtill.int2HMInt(beginTimes+tempTime, timezone);
 						strT = TimeUtil.int2TimeHM(beginTimes + tempTime, timezone, dst_off);
 						/*
 						 * if(times.length==2) strT=times[0]+":"+times[1];

@@ -487,7 +487,7 @@ public class LineGraphView extends GraphView {
 			endX = (float) x + (horstart + 1);
 			endY = (float) (border - y) + graphheight;
 
-			if (i > 0) {
+			if (i >= 0) {
 				float startX = (float) lastEndX + (horstart + 1);
 				float startY = (float) (border - lastEndY) + graphheight;
 				if (isMySelft)
@@ -558,7 +558,9 @@ public class LineGraphView extends GraphView {
 						paint.setColor(style.color);
 					}
 					lastValue = values[i].getY();
-					canvas.drawLine(startX, startY, endX, endY, paint);
+					if(i>0) {
+						canvas.drawLine(startX, startY, endX, endY, paint);
+					}
 				}
 
 				if (bgPath != null) {

@@ -171,6 +171,30 @@
     
     <View style="@style/page_divider"/>
     
+        <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/report_item_height"
+        android:orientation="horizontal" 
+        android:gravity="center_vertical"
+        >
+
+        <TextView
+            android:layout_width="@dimen/data_fragment_label_width"
+            android:layout_height="wrap_content"
+            android:text="@string/algorithm_version"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_algorithm_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+    </LinearLayout>
+    
+    <View style="@style/page_divider"/>
+    
     
 
 </LinearLayout>

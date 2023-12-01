@@ -3,8 +3,6 @@ package com.sleepace.z400tsdk.demo.fragment;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.sleepace.z400tsdk.demo.MainActivity;
-import com.sleepace.z400tsdk.demo.R;
 import com.sleepace.sdk.interfs.IConnectionStateCallback;
 import com.sleepace.sdk.interfs.IDeviceManager;
 import com.sleepace.sdk.interfs.IResultCallback;
@@ -12,9 +10,9 @@ import com.sleepace.sdk.manager.CONNECTION_STATE;
 import com.sleepace.sdk.manager.CallbackData;
 import com.sleepace.sdk.util.SdkLog;
 import com.sleepace.sdk.z400t.domain.BatteryBean;
+import com.sleepace.z400tsdk.demo.MainActivity;
+import com.sleepace.z400tsdk.demo.R;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -211,9 +209,9 @@ public class DeviceFragment extends BaseFragment {
 		if (v == btnUpgrade) {
 			try {
 				FirmwareBean bean = new FirmwareBean();
-				bean.is = getResources().getAssets().open("Z400T-2_20200801_ReleaseFull_V1.02(2.0.3).des");
-				bean.crcBin = 2233826044l;
-				bean.crcDes = 1113642742l;
+				bean.is = getResources().getAssets().open("Z400T-2(Z400T&SW)-v1.39(v2.01.02b)-g-20231110.des");
+				bean.crcBin = 1578783682l;
+				bean.crcDes = 3266595119l;
 				upgrade(bean);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

@@ -220,14 +220,266 @@
         <TextView
             android:layout_width="@dimen/data_fragment_label_width"
             android:layout_height="wrap_content"
-            android:text="@string/respiration_pause"
+            android:text="@string/ahi"
             android:textColor="@color/COLOR_3"
             android:textSize="@dimen/Title_4" />
 
         <TextView
-            android:id="@+id/tv_respiration_pause"
+            android:id="@+id/tv_ahi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+
+    <View style="@style/page_divider" />
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/distribution_apnea_events"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_ahi_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+    
+    <View style="@style/page_divider" />
+    
+      <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/head_apnea_duration"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_head_apnea_duration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+    
+    <View style="@style/page_divider" />
+    
+        <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/head_apnea_events"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_head_apnea_events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+    
+    <View style="@style/page_divider" />
+    
+        <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/csa_duration"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_csa_duration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+    
+    <View style="@style/page_divider" />
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/events_of_csa"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_events_of_csa"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+    
+    <View style="@style/page_divider" />
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/max_csa_duration"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_max_csa_duration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+    
+    <View style="@style/page_divider" />
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/osa_duration"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_osa_duration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+    
+    <View style="@style/page_divider" />
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/events_of_osa"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_events_of_osa"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" 
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            />
+    </LinearLayout>
+    
+    <View style="@style/page_divider" />
+    
+     <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/report_item_height"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/max_osa_duration"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_max_osa_duration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
             android:textColor="@color/COLOR_3"
             android:textSize="@dimen/Title_4" 
             android:paddingTop="10dp"
@@ -459,6 +711,30 @@
 
         <TextView
             android:id="@+id/tv_humidity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+    </LinearLayout>
+    
+    <View style="@style/page_divider"/>
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/report_item_height"
+        android:orientation="horizontal" 
+        android:gravity="center_vertical"
+        >
+
+        <TextView
+            android:layout_width="@dimen/data_fragment_label_width"
+            android:layout_height="wrap_content"
+            android:text="@string/algorithm_version"
+            android:textColor="@color/COLOR_3"
+            android:textSize="@dimen/Title_4" />
+
+        <TextView
+            android:id="@+id/tv_algorithm_version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/COLOR_3"
