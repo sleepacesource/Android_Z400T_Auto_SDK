@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
   <string name="update_failed">升级失败</string>
   <string name="hint_analyze_fail">无法分析小于10分钟的睡眠数据</string>

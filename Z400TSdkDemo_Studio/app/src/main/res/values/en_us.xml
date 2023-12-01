@@ -140,7 +140,7 @@
   <string name="temp">Temperature</string>
   <string name="humidity">Humidity</string>
   <string name="ahi">AHI</string>
-  <string name="distribution_apnea_events">Distribution Of Apnea Frequency</string>
+  <string name="distribution_apnea_events">Distribution of apneas</string>
   <string name="head_apnea_duration">Head Apnea Duration</string>
   <string name="head_apnea_events">Head Apnea Events</string>
   <string name="csa_duration">CSA Duration</string>

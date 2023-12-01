@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
   <string name="update_failed">Firmware Update Failed</string>
   <string name="hint_analyze_fail">Unable To Analyze Sleep Lasting Less Than 10 Minutes</string>
@@ -140,8 +139,8 @@
   <string name="opt_fail">No device connected, operation failed</string>
   <string name="temp">Temperature</string>
   <string name="humidity">Humidity</string>
-    <string name="ahi">AHI</string>
-  <string name="max_apnea_duration">Max Apnea/Hypopnea Duration</string>
+  <string name="ahi">AHI</string>
+  <string name="distribution_apnea_events">Distribution of apneas</string>
   <string name="head_apnea_duration">Head Apnea Duration</string>
   <string name="head_apnea_events">Head Apnea Events</string>
   <string name="csa_duration">CSA Duration</string>
